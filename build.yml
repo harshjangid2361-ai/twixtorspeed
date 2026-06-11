@@ -1,0 +1,42 @@
+name: Build TwixtorSpeed Plugin
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Install CMake
+      run: choco install cmake -y
+      
+    - name: Download Adobe SDK
+      run: |
+        echo "Note: You need to download Adobe After Effects SDK manually"
+        echo "Download from: https://developer.adobe.com/console"
+        echo "Extract to: C:\Adobe\SDK"
+      continue-on-error: true
+    
+    - name: Create SDK Directory
+      run: mkdir -p "C:\Adobe\SDK\Headers"
+      
+    - name: Configure CMake
+      run: |
+        cmake -B build -DADOBE_SDK_PATH="C:\Adobe\SDK" -G "Visual Studio 16 2019"
+      
+    - name: Build
+      run: cmake --build build --config Release
+      
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: TwixtorSpeed.aex
+        path: build/output/TwixtorSpeed.aex
+        if-no-files-found: ignore
+
